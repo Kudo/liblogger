@@ -18,7 +18,7 @@ configure_file (${CMAKE_CURRENT_SOURCE_DIR}/inc/config.h.cmake
 		${CMAKE_CURRENT_BINARY_DIR}/inc/config.h)
 
 file (GLOB HEADER_FILES ${CMAKE_CURRENT_SOURCE_DIR}/inc/liblogger/*.h)
-install (FILES ${HEADER_FILES} DESTINATION include)
+install (FILES ${HEADER_FILES} DESTINATION include/liblogger)
 
 add_subdirectory(src)
 
