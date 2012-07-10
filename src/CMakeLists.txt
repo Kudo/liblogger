@@ -1,25 +1,30 @@
-cmake_minimum_required (VERSION 2.8)
-project (liblogger)
+set(SRC_FILES
+    liblogger.c
+    file_logger.c
+    LLTimeUtil.c
+)
 
-OPTION (BUILD_SHARED_LIBS "Build shared libraries." OFF)
-OPTION (BUILD_TESTS "Build testapp" OFF)
-OPTION (DISABLE_THREAD_SAFETY "Set to disable thread safety" OFF)
-OPTION (DISABLE_SOCKET_LOGGER "Set to 1 to disable socket logger" OFF)
-
-set (LIBLOGGER_VERSION "0.2")
-set (LIBLOGGER_SOVERSION 0)
-
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/inc)
-include_directories (${CMAKE_CURRENT_BINARY_DIR}/inc)
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/src/platform_layer/inc)
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/src)
-
-configure_file (${CMAKE_CURRENT_SOURCE_DIR}/inc/config.h.cmake
-		${CMAKE_CURRENT_BINARY_DIR}/inc/config.h)
-
-add_subdirectory(src)
-
-if (BUILD_TESTS)
-    OPTION (BUILD_TESTS_WITH_DISABLED_LOGGER "Build testapp with disabled logger" OFF)
-    add_subdirectory(testapp)
+if (NOT DISABLE_THREAD_SAFETY)
+    list (APPEND SRC_FILES platform_layer/posix/tPLMutex.c)
 endif ()
+
+if (NOT DISABLE_SOCKET_LOGGER)
+    list (APPEND SRC_FILES socket_logger.c platform_layer/posix/tPLSocket.c)
+endif ()
+
+add_library (logger SHARED ${SRC_FILES})
+set_target_properties (logger PROPERTIES
+    VERSION ${LIBLOGGER_VERSION}
+    SOVERSION ${LIBLOGGER_SOVERSION})
+install (TARGETS logger
+   ARCHIVE DESTINATION lib
+   LIBRARY DESTINATION lib
+   RUNTIME DESTINATION bin
+)
+
+add_library (logger-static ${SRC_FILES})
+install (TARGETS logger-static
+   ARCHIVE DESTINATION lib
+   LIBRARY DESTINATION lib
+   RUNTIME DESTINATION bin
+)
