@@ -27,7 +27,7 @@
 #include <winsock2.h>
 /** Abstract handle for socket. */
 typedef SOCKET tPLSocket;
-#elif defined(__unix) || defined(__linux)
+#elif defined(__unix) || defined(__linux) || defined(__linux__) || defined(__MACH__)
 /* A Unix system */
 /** Abstract handle for socket. */
 typedef int tPLSocket;

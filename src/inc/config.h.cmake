@@ -1,0 +1,2 @@
+#cmakedefine DISABLE_THREAD_SAFETY
+#cmakedefine DISABLE_SOCKET_LOGGER

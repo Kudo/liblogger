@@ -24,7 +24,7 @@
 #include <windows.h>
 /** The mutex handle. */
 typedef HANDLE tPLMutex;
-#elif defined(__unix) || defined(__linux)
+#elif defined(__unix) || defined(__linux) || defined(__linux__) || defined(__MACH__)
 #include <pthread.h>
 /* A Unix system */
 /** The mutex handle. */
