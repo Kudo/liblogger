@@ -1,0 +1,8 @@
+{ TestFuncMin 
+[T]:testapp/src_min.cpp:TestFuncMin:11:Trace log Test 1.066000
+[D]:testapp/src_min.cpp:TestFuncMin:12:Debug level log
+[I]:testapp/src_min.cpp:TestFuncMin:13:Info level log 0
+[W]:testapp/src_min.cpp:TestFuncMin:14:Warn level log
+[E]:testapp/src_min.cpp:TestFuncMin:15:Error level log
+[F]:testapp/src_min.cpp:TestFuncMin:16:Fatal level log
+TestFuncMin : 21 }

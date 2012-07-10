@@ -1,0 +1,99 @@
+# Scons build script.
+import os
+import sys
+import glob
+
+
+# The build environment.
+env = Environment(
+			ENV = {'PATH' : os.environ['PATH']},
+			CCFLAGS='-Wall'
+			)
+opts = Options('')
+opts.Add('RELEASE', 'Set to 1 to build for release', 0)
+opts.Add('DISABLE_THREAD_SAFETY', 'Set to 1 to disable thread safety', 0)
+opts.Add('DISABLE_SOCKET_LOGGER', 'Set to 1 to disable socket logger', 0)
+opts.Add('CROSS_COMPILE', 'Set this to cross compile, example : arm-linux- ' )
+Help(opts.GenerateHelpText(env))
+
+# liblogger source include path.
+LIBLOGGER_INCS = ['../inc','../src/platform_layer/inc','../src/',]
+# liblogger sources to include in build.
+LIBLOGGER_SRCS = [
+			'../src/liblogger.c',
+			'../src/file_logger.c',
+			'../src/LLTimeUtil.c',
+				]
+# check for cross compilation.
+cross_compile = ARGUMENTS.get('CROSS_COMPILE')
+if cross_compile != None :
+	env.Replace( CC = cross_compile + env['CC'])
+	env.Replace( AR = cross_compile + env['AR'])
+	env.Replace( CXX = cross_compile + env['CXX'])
+
+# check if 	thread safety should be disabled. 
+disable_thread_safety = ARGUMENTS.get('DISABLE_THREAD_SAFETY', 0)
+if int(disable_thread_safety) == 0:
+	LIBLOGGER_SRCS += [ '../src/platform_layer/posix/tPLMutex.c' ]
+else:	
+	env.Append(CPPDEFINES = ['DISABLE_THREAD_SAFETY'] )
+
+# check if socket logger is disabled	
+disable_sock_logger = ARGUMENTS.get('DISABLE_SOCKET_LOGGER', 0)
+if int(disable_sock_logger) == 0:
+	LIBLOGGER_SRCS += [ '../src/socket_logger.c' ,
+						'../src/platform_layer/posix/tPLSocket.c'
+					  ]
+else:	
+	env.Append(CPPDEFINES = ['DISABLE_SOCKET_LOGGER'] )
+
+# check if release mode is enabled.
+release = ARGUMENTS.get('RELEASE', 0)
+if int(release) == 0:
+	env.Append(CCFLAGS = ' -ggdb')
+else:
+	env.Append(CCFLAGS = ' -O3')
+
+# create static library : liblogger.a
+env.StaticLibrary(
+		'logger',
+		LIBLOGGER_SRCS,
+		CPPPATH = LIBLOGGER_INCS,
+		)
+
+# create shared library : liblogger.so
+env.SharedLibrary(
+		'logger',
+		LIBLOGGER_SRCS,
+		CPPPATH = LIBLOGGER_INCS,
+		)
+
+TESTAPP_SRCS = glob.glob('../testapp/*.cpp')
+TESTAPP_INCS = ['../inc']
+
+if 'logger_disable_test' in COMMAND_LINE_TARGETS:
+	# logger is disabled.
+	env.Program(
+		'logger_disable_test',
+		TESTAPP_SRCS,
+		CPPPATH = TESTAPP_INCS,
+		CPPFLAGS = ['-Wall','-ggdb', '-DDISABLE_ALL_LOGS',]
+		)
+else :
+	# program using the logger. 
+	env.Program(
+		'logger_test',
+		TESTAPP_SRCS,
+		CPPPATH = TESTAPP_INCS,
+		LIBS	= ['logger'],
+		LIBPATH	= ['.']
+	)
+	# program using the logger, check append / rollback mode.
+	env.Program(
+		'file_logger_test',
+		glob.glob('../testapp/file_logger_tests/*.cpp'),
+		CPPPATH = TESTAPP_INCS,
+		LIBS	= ['logger'],
+		LIBPATH	= ['.']
+	)
+

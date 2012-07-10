@@ -1,0 +1,4 @@
+liblogger Version 0.2 (17 Sept 2011)
+* License changes from GNU GPL to Apache Software license 2.0
+
+
