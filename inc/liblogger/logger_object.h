@@ -37,6 +37,10 @@ typedef int (*LoggerDeInit)(struct LogWriter* _this);
 /** The log writer object */
 typedef struct LogWriter
 {
+	/** The log level */
+	LogLevel	logLevel;
+	/** The log module name */
+	char		moduleName[256];
 	/** Member function to log. */
 	Log 			log;
 	/** Member function to log the function entry. */

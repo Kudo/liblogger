@@ -8,8 +8,6 @@
 #include "logtest.h"
 #include <memory.h>
 
-#define TEST_LOG_TO_SOCK
-
 void TestLogToFile();
 void TestLogToConsole();
 void TestLogToSocket();
@@ -35,6 +33,8 @@ void TestLogToFile()
 	// very important, memset to prevent breaks when new members are
 	// added to fileInitParams.
 	memset(&fileInitParams,0,sizeof(tFileLoggerInitParams));
+	fileInitParams.logLevel = Trace;
+	fileInitParams.moduleName = "testFileModule";
 	fileInitParams.fileName = "log.log";
 	InitLogger(LogToFile,&fileInitParams);
 	TestLogFuncs();
@@ -45,8 +45,13 @@ void TestLogToFile()
 
 void TestLogToConsole()
 {
+	tConsoleLoggerInitParams consoleInitParams;
 	// the init argument can be either stdout or stderr.
-	InitLogger(LogToConsole, stdout);
+	memset(&consoleInitParams, 0, sizeof(tConsoleLoggerInitParams));
+	consoleInitParams.logLevel = Error;
+	//consoleInitParams.moduleName = "testConsoleModule";
+	consoleInitParams.consoleDest = ConsoleDestStdout;
+	InitLogger(LogToConsole, &consoleInitParams);
 	TestLogFuncs();
 	DeInitLogger();
 }
@@ -57,6 +62,8 @@ void TestLogToSocket()
 	// very important, memset to prevent breaks when new members are
 	// added to sockInitParams.
 	memset(&sockInitParams,0,sizeof(tSockLoggerInitParams));
+	sockInitParams.logLevel = Error;
+	sockInitParams.moduleName = "testSockModule";
 	sockInitParams.server 	= "127.0.0.1";
 	sockInitParams.port		= 50007;
 
@@ -67,11 +74,17 @@ void TestLogToSocket()
 	
 void TestLogFuncs()
 {
-	TestFuncWarn();
-	TestFuncDebug();
-	TestFuncFatal();
+	LogFuncEntry();
+
+	LogTrace("Trace log %s %f", "Test", 1.066f);
+	LogDebug("Debug level log" );
+	LogInfo("Info level log %d" , 0);
+	LogWarn("Warn level log" );
+	LogError("Error level log" );
+	LogFatal("Fatal level log" );
+
+	
 	TestFuncNoLogs();
-	TestFuncMin();
 	TestNoFilename();
 
 	// crash testing, test for buffer overflow vulnerability, in case of socket logging, this huge log
@@ -167,4 +180,6 @@ void TestLogFuncs()
 		"abcdefghijklmnopqrstuvwxyz-abcdefghijklmnopqrstuvwxyz-abcdefghijklmnopqrstuvwxyz-abcdefghijklmnopqrstuvwxyz"
 		);
 
+	// log the function exit .
+	LogFuncExit();
 }

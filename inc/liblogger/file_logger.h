@@ -41,11 +41,34 @@ typedef enum tFileOpenMode
 #endif // _ENABLE_LL_ROLLBACK_
 } tFileOpenMode;
 
+/** Console destination
+ * */
+typedef enum tConsoleDest
+{
+    ConsoleDestStdout = 0x00,
+    ConsoleDestStderr
+} tConsoleDest;
+
+/** Console Logger Initialization parameters. */
+typedef struct tConsoleLoggerInitParams
+{
+	/** The log level */
+	LogLevel	logLevel;
+	/** The log module name */
+	char*		moduleName;
+	/** The destination of the console log. */
+	tConsoleDest	consoleDest;
+} tConsoleLoggerInitParams;
+
 /** File Logger Initialization parameters. */
 typedef struct tFileLoggerInitParams
 {
+	/** The log level */
+	LogLevel	logLevel;
+	/** The log module name */
+	char*		moduleName;
 	/** The filename of the log. */
-	char* 			fileName;
+	char* 		fileName;
 	/** The file open mode. */
 	tFileOpenMode 	fileOpenMode;
 #ifdef _ENABLE_LL_ROLLBACK_

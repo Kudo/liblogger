@@ -42,7 +42,7 @@
 /** Indicates the log level */
 typedef enum LogLevel
 {
-	Trace, /**< The trace log level */
+	Trace = 0x00, /**< The trace log level */
 	Debug, /**< The debug log level */
 	Info, /**< The info log level */
 	Warn, /**< The warn log level */

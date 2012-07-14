@@ -39,7 +39,7 @@ int LLGetCurDateTime(char* str, int strLen)
 		return -1;
 	}
 
-	if (strftime(str, strLen, " %c ", tmp) == 0) {
+	if (strftime(str, strLen, "%Y-%m-%d %H:%M:%S", tmp) == 0) {
 		fprintf(stderr, "strftime returned 0");
 		return -1;
 	}

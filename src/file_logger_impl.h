@@ -36,6 +36,6 @@ int InitFileLogger(LogWriter** logWriter,tFileLoggerInitParams* initParams );
  * \param [in]	initParams	The log writer initialization parameters.
  * \returns 0 on success , -1 on failure.
  * */
-int InitConsoleLogger(LogWriter** logWriter,void* initParams);
+int InitConsoleLogger(LogWriter** logWriter,tConsoleLoggerInitParams* initParams);
 
 #endif // __FILE_LOGGER_IMPL_H__

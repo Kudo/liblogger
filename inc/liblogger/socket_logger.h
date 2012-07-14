@@ -22,6 +22,10 @@
 /** Socket Logger Initialization parameters. */
 typedef struct tSockLoggerInitParams
 {
+	/** The log level */
+	LogLevel	logLevel;
+	/** The log module name */
+	char*		moduleName;
 	/** The log server, can be a IP address or a generic host name. */
 	char* 	server;
 	/** The port of the log server. */

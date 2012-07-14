@@ -3,15 +3,9 @@
  * Sample file illustrating the selective disabling of filename
  * from appearing in the logs generated from this file.
  * */
-#include <liblogger/liblogger_levels.h>
-// For this file, we choose the logs with priority Info and higher, 
-// so logs with lesser priority i.e 
-// LogTrace(), LogDebug(), will NOT appear, THEY WILL BE NULL STATEMENTS WITH NO OVERHEAD
-#define LOG_LEVEL LOG_LEVEL_INFO
 // We Choose not to include the filenames in the log generated from this source file.
 #define DISABLE_FILENAMES
 // The module name for this file.
-#define LOG_MODULE_NAME	"ModuleInfoTest"
 #include <liblogger/liblogger.h>
 
 int TestNoFilename()

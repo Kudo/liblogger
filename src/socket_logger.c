@@ -20,6 +20,7 @@
 #include "tPLSocket.h"
 #include "LLTimeUtil.h"
 #include <win32_support.h>
+#include <string.h>
 
 /** The maximum size of the log. */
 #define BUF_MAX 1024
@@ -51,7 +52,9 @@ typedef struct SockLogWriter
 static SockLogWriter sSockLogWriter = 
 {
 	{
-		/* .base.log 			= */sSendToSock, 
+		/* .base.logLevel	= */Trace,
+		/* .base.moduleName	= */{0},
+		/* .base.log 		= */sSendToSock, 
 		/* .base.logFuncEntry 	= */sSockFuncLogEntry,
 		/* .base.logFuncExit	= */sSockFuncLogExit,
 		/* .base.loggerDeInit 	= */sSockLoggerDeInit,	
@@ -91,6 +94,17 @@ int InitSocketLogger(LogWriter** logWriter,tSockLoggerInitParams *initParams)
 			PLSockSend(sSockLogWriter.sock,tempBuf,bytes);
 		}
 	}
+
+	/* Set log level */
+	sSockLogWriter.base.logLevel = initParams->logLevel;
+
+	/* Set log module name */
+	if (initParams->moduleName)
+	{
+	    strncpy(sSockLogWriter.base.moduleName, initParams->moduleName, sizeof(sSockLogWriter.base.moduleName) - 1);
+	    sSockLogWriter.base.moduleName[sizeof(sSockLogWriter.base.moduleName) - 1] = '\0';
+	}
+
 	*logWriter = (LogWriter*)&sSockLogWriter;
 	return 0; // success!
 }
@@ -113,12 +127,16 @@ static int sSendToSock(LogWriter *_this,const LogLevel logLevel,
 	else
 	{
 		char buf[BUF_MAX];
+		char curDateTime[32];
 		int bytes = 0;
+
+		memset(curDateTime, 0, sizeof(curDateTime));
+		LLGetCurDateTime(curDateTime, sizeof(curDateTime));
 #ifdef VARIADIC_MACROS
-		bytes = snprintf(buf,BUF_MAX-1,"\n%s:%s:%s:%s:%d:",sGetLogPrefix(logLevel),
-				moduleName,file,funcName,lineNum);
+		bytes = snprintf(buf,BUF_MAX-1,"\n[%s] %s %s::%s#%d:%s() - ", curDateTime, sGetLogPrefix(logLevel),
+				moduleName,file,lineNum,funcName);
 #else
-		bytes = snprintf(buf,BUF_MAX-1,"\n%s",sGetLogPrefix(logLevel));
+		bytes = snprintf(buf,BUF_MAX-1,"\n[%s] %s - ", curDateTime, sGetLogPrefix(logLevel));
 #endif
 		// to be on safer side, check if required size is available.
 		if(bytes < (BUF_MAX -1) )
@@ -191,6 +209,8 @@ int sSockLoggerDeInit(LogWriter* _this)
 	{
 		PLDestroySocket(&slw->sock);
 	}
+	slw->base.logLevel = Trace;
+	memset(&(slw->base.moduleName), 0, sizeof(slw->base.moduleName));
 	return 0;
 }
 

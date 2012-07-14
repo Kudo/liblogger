@@ -22,6 +22,8 @@ void TestLogToFile_Append()
 	// very important, memset to prevent breaks when new members are
 	// added to fileInitParams.
 	memset(&fileInitParams,0,sizeof(tFileLoggerInitParams));
+	fileInitParams.logLevel = Info;
+	fileInitParams.moduleName = "testAppendFileModule";
 	fileInitParams.fileName = "log.log";
 	fileInitParams.fileOpenMode = AppendMode;
 	InitLogger(LogToFile,&fileInitParams);

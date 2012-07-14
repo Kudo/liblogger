@@ -31,6 +31,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>
+#include <strings.h>
 
 #ifndef DISABLE_ALL_LOGS 
 
@@ -46,11 +47,14 @@ static tPLMutex	sMutex = 0;
  * */
 #define CHECK_AND_INIT_LOGGER	if(!pLogWriter)	\
 	{ 											\
+		tConsoleLoggerInitParams consoleInitParams;					\
+		memset(&consoleInitParams, 0, sizeof(tConsoleLoggerInitParams));		\
+		consoleInitParams.consoleDest = ConsoleDestStdout;				\
 		fprintf(stderr,"\n[liblogger]liblogger not initialized, logging will be done to console (stdout)\n");\
-		if(InitLogger(LogToConsole,stdout)) 			\
-			return -1; 							\
-		if(!pLogWriter)							\
-			return -1;							\
+		if(InitLogger(LogToConsole,&consoleInitParams))					\
+			return -1;								\
+		if(!pLogWriter)									\
+			return -1;								\
 	}											\
 
 
@@ -138,19 +142,21 @@ void DeInitLogger()
 
 int vsLogStub(LogLevel logLevel,
 #ifdef VARIADIC_MACROS
-		const char* moduleName,const char* file,
-		const char* funcName, const int lineNum,
+		const char* file, const char* funcName, const int lineNum,
 #endif
 	const char* fmt,va_list ap)
 {
 	int retVal = 0;
 	CHECK_AND_INIT_LOGGER;
 
+	if (logLevel < pLogWriter->logLevel)
+	    return -1;
+
 	__LOCK_MUTEX;
 
 	retVal = pLogWriter->log(pLogWriter,logLevel,
 #ifdef VARIADIC_MACROS
-			moduleName,file,funcName,lineNum,
+			pLogWriter->moduleName,file,funcName,lineNum,
 #endif
 			fmt,ap);
 
@@ -161,15 +167,14 @@ int vsLogStub(LogLevel logLevel,
 
 #ifdef VARIADIC_MACROS
 int LogStub_vm(LogLevel logLevel,
-		const char* moduleName,const char* file,
-		const char* funcName, const int lineNum,
+		const char* file,const char* funcName, const int lineNum,
 		const char* fmt,...)
 {
 
 	va_list ap; 
 	int retVal = 0;
 	va_start(ap,fmt);
-	retVal = vsLogStub(logLevel,moduleName,file,funcName,lineNum,fmt,ap);
+	retVal = vsLogStub(logLevel,file,funcName,lineNum,fmt,ap);
 	va_end(ap);
 	return retVal;
 }
@@ -243,6 +248,8 @@ int FuncLogEntry(const char* funcName)
 {
 	int retVal = 0;
 	CHECK_AND_INIT_LOGGER;
+	if (pLogWriter->logLevel > Trace)
+	    return -1;
 	__LOCK_MUTEX;
 	retVal = pLogWriter->logFuncEntry(pLogWriter,funcName);
 	__UNLOCK_MUTEX;
@@ -253,6 +260,8 @@ int FuncLogExit(const char* funcName,const int lineNumber)
 {
 	int retVal = 0;
 	CHECK_AND_INIT_LOGGER;
+	if (pLogWriter->logLevel > Trace)
+	    return -1;
 	__LOCK_MUTEX;
 	retVal = pLogWriter->logFuncExit(pLogWriter,funcName,lineNumber);
 	__UNLOCK_MUTEX;

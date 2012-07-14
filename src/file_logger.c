@@ -76,9 +76,11 @@ static void __CHECK_AND_ROLLBACK(FileLogWriter* flw);
 static FileLogWriter sFileLogWriter = 
 {
 	{
-		/*.base.log				= */sWriteToFile,
-		/*.base.logFuncEntry	= */ sFileFuncLogEntry,
-		/*.base.logFuncExit		= */sFileFuncLogExit,
+		/*.base.logLevel	= */Trace,
+		/*.base.moduleName	= */{0},
+		/*.base.log		= */sWriteToFile,
+		/*.base.logFuncEntry	= */sFileFuncLogEntry,
+		/*.base.logFuncExit	= */sFileFuncLogExit,
 		/*.base.loggerDeInit	= */sFileLoggerDeInit,
 	},
 #ifdef _ENABLE_LL_ROLLBACK_
@@ -90,7 +92,7 @@ static FileLogWriter sFileLogWriter =
 /* Function to initialize the console logger, a console logger is a special case of file logger, 
  * where the file is stdout / stderr
  * */
-int InitConsoleLogger(LogWriter** logWriter,void* dest)
+int InitConsoleLogger(LogWriter** logWriter,tConsoleLoggerInitParams* initParams)
 {
 	char curDateTime[32];	
 	if(!logWriter)
@@ -104,17 +106,35 @@ int InitConsoleLogger(LogWriter** logWriter,void* dest)
 	{
 		sFileLoggerDeInit((LogWriter*)&sFileLogWriter);
 	}
-	if ( (dest != stdout) && (dest != stderr) )
+	if (initParams->consoleDest == ConsoleDestStdout)
 	{
-		fprintf(stderr,"Incorrect init params for console logger, stdout will be used.\n");
-		dest = stdout;
+	    sFileLogWriter.fp = stdout;
+	}
+	else if (initParams->consoleDest == ConsoleDestStderr)
+	{
+	    sFileLogWriter.fp = stderr;
+	}
+	else
+	{
+	    fprintf(stderr,"Incorrect init params for console logger, stdout will be used.\n");
+	    sFileLogWriter.fp = stdout;
 	}
 #ifdef _ENABLE_LL_ROLLBACK_
 	sFileLogWriter.rollbackSize = 0;
 #endif // _ENABLE_LL_ROLLBACK_
-	sFileLogWriter.fp = dest;
 	if( !LLGetCurDateTime(curDateTime,sizeof(curDateTime)) )
 		fprintf(sFileLogWriter.fp,"\n----- Logging Started on %s -----\n", curDateTime);
+
+	/* Set log level */
+	sFileLogWriter.base.logLevel = initParams->logLevel;
+
+	/* Set log module name */
+	if (initParams->moduleName)
+	{
+	    strncpy(sFileLogWriter.base.moduleName, initParams->moduleName, sizeof(sFileLogWriter.base.moduleName) - 1);
+	    sFileLogWriter.base.moduleName[sizeof(sFileLogWriter.base.moduleName) - 1] = '\0';
+	}
+
 	*logWriter = (LogWriter*)&sFileLogWriter;
 	return 0; // success!
 }
@@ -184,6 +204,16 @@ int InitFileLogger(LogWriter** logWriter,tFileLoggerInitParams* initParams)
 #endif // _ENABLE_LL_ROLLBACK_
 	}
 
+	/* Set log level */
+	sFileLogWriter.base.logLevel = initParams->logLevel;
+
+	/* Set log module name */
+	if (initParams->moduleName)
+	{
+	    strncpy(sFileLogWriter.base.moduleName, initParams->moduleName, sizeof(sFileLogWriter.base.moduleName) - 1);
+	    sFileLogWriter.base.moduleName[sizeof(sFileLogWriter.base.moduleName) - 1] = '\0';
+	}
+
 	/* Log the current date time when the log is started. */
 	*logWriter = (LogWriter*)&sFileLogWriter;
 	return 0; // success!
@@ -206,9 +236,12 @@ static int sWriteToFile(LogWriter *_this,
 	}
 	else
 	{
-		fprintf(flw->fp,sGetLogPrefix(logLevel));
+		char curDateTime[32];
+		memset(curDateTime, 0, sizeof(curDateTime));
+		LLGetCurDateTime(curDateTime, sizeof(curDateTime));
+		fprintf(flw->fp,"[%s] %s ", curDateTime, sGetLogPrefix(logLevel));
 #ifdef VARIADIC_MACROS
-		fprintf(flw->fp,"%s:%s:%s:%d:",moduleName,file,funcName,lineNum);
+		fprintf(flw->fp,"%s::%s#%d:%s() - ",moduleName,file,lineNum,funcName);
 #endif
 		vfprintf(flw->fp,fmt,ap); 
 		fprintf(flw->fp,"\n");
@@ -278,6 +311,8 @@ int sFileLoggerDeInit(LogWriter* _this)
 #ifdef _ENABLE_LL_ROLLBACK_
 	flw->rollbackSize = 0;
 #endif // _ENABLE_LL_ROLLBACK_
+	flw->base.logLevel = Trace;
+	memset(&(flw->base.moduleName), 0, sizeof(flw->base.moduleName));
 	return 0;
 }
 
