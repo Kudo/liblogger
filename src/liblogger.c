@@ -31,7 +31,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>
-#include <strings.h>
+#include <string.h>
 
 #ifndef DISABLE_ALL_LOGS 
 
