@@ -42,12 +42,13 @@
 /** Indicates the log level */
 typedef enum LogLevel
 {
-	Trace = 0x00, /**< The trace log level */
-	Debug, /**< The debug log level */
-	Info, /**< The info log level */
-	Warn, /**< The warn log level */
-	Error, /**< The error log level */
-	Fatal /**< The fatal log level */
+	Trace = LOG_LEVEL_TRACE,	/**< The trace log level */
+	Debug = LOG_LEVEL_DEBUG,	/**< The debug log level */
+	Info = LOG_LEVEL_INFO,		/**< The info log level */
+	Warn = LOG_LEVEL_WARN,		/**< The warn log level */
+	Error = LOG_LEVEL_ERROR,	/**< The error log level */
+	Fatal = LOG_LEVEL_FATAL,	/**< The fatal log level */
+	Disable = LOG_LEVEL_DISABLED	/**< the disabled log level */
 }LogLevel;
 
 /** @} */
