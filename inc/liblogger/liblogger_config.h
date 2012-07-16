@@ -19,9 +19,6 @@
 #ifndef __LIBLOGGER_CONFIG_H__
 #define __LIBLOGGER_CONFIG_H__
 
-/** define this macro to disable all logs */
-//#define DISABLE_ALL_LOGS
-
 /** Define this macro to prevent checking the variadic macro support of your compiler.
  * By defining this macro, you can also stop the filenames, function name, and the line no
  * from appearing in the logs.

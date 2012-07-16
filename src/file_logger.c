@@ -106,24 +106,28 @@ int InitConsoleLogger(LogWriter** logWriter,tConsoleLoggerInitParams* initParams
 	{
 		sFileLoggerDeInit((LogWriter*)&sFileLogWriter);
 	}
-	if (initParams->consoleDest == ConsoleDestStdout)
+
+	if (initParams->logLevel != Disable)
 	{
-	    sFileLogWriter.fp = stdout;
-	}
-	else if (initParams->consoleDest == ConsoleDestStderr)
-	{
-	    sFileLogWriter.fp = stderr;
-	}
-	else
-	{
-	    fprintf(stderr,"Incorrect init params for console logger, stdout will be used.\n");
-	    sFileLogWriter.fp = stdout;
-	}
+	    if (initParams->consoleDest == ConsoleDestStdout)
+	    {
+		sFileLogWriter.fp = stdout;
+	    }
+	    else if (initParams->consoleDest == ConsoleDestStderr)
+	    {
+		sFileLogWriter.fp = stderr;
+	    }
+	    else
+	    {
+		fprintf(stderr,"Incorrect init params for console logger, stdout will be used.\n");
+		sFileLogWriter.fp = stdout;
+	    }
 #ifdef _ENABLE_LL_ROLLBACK_
-	sFileLogWriter.rollbackSize = 0;
+	    sFileLogWriter.rollbackSize = 0;
 #endif // _ENABLE_LL_ROLLBACK_
-	if( !LLGetCurDateTime(curDateTime,sizeof(curDateTime)) )
-		fprintf(sFileLogWriter.fp,"\n----- Logging Started on %s -----\n", curDateTime);
+	    if( !LLGetCurDateTime(curDateTime,sizeof(curDateTime)) )
+		    fprintf(sFileLogWriter.fp,"\n----- Logging Started on %s -----\n", curDateTime);
+	}
 
 	/* Set log level */
 	sFileLogWriter.base.logLevel = initParams->logLevel;
@@ -176,32 +180,35 @@ int InitFileLogger(LogWriter** logWriter,tFileLoggerInitParams* initParams)
 		default:			fileOpenMode = "w"; break;
 	}
 
-	sFileLogWriter.fp = fopen(initParams->fileName,fileOpenMode);
-	if( !sFileLogWriter.fp )
+	if (initParams->logLevel != Disable)
 	{
-		fprintf(stderr,"could not open log file %s",initParams->fileName);
-		return -1;
-	}
-	else
-	{
-		/* file open success. */
-		char curDateTime[32];	
-		if( !LLGetCurDateTime(curDateTime,sizeof(curDateTime)) )
-			fprintf(sFileLogWriter.fp,"\n----- Logging Started on %s -----\n", curDateTime);
-
-#ifdef _ENABLE_LL_ROLLBACK_
-		/* if the file open is successful, and rollback mode is specified, note down the
-		 * rollback size. 
-		 * */
-		if(RollbackMode == initParams->fileOpenMode)
+		sFileLogWriter.fp = fopen(initParams->fileName,fileOpenMode);
+		if( !sFileLogWriter.fp )
 		{
-			sFileLogWriter.rollbackSize = initParams->rollbackSize;
-			fseek(sFileLogWriter.fp,0L,SEEK_END);
-			__CHECK_AND_ROLLBACK(&sFileLogWriter);
+			fprintf(stderr,"could not open log file %s",initParams->fileName);
+			return -1;
 		}
 		else
-			sFileLogWriter.rollbackSize = 0;
+		{
+			/* file open success. */
+			char curDateTime[32];	
+			if( !LLGetCurDateTime(curDateTime,sizeof(curDateTime)) )
+				fprintf(sFileLogWriter.fp,"\n----- Logging Started on %s -----\n", curDateTime);
+
+#ifdef _ENABLE_LL_ROLLBACK_
+			/* if the file open is successful, and rollback mode is specified, note down the
+			 * rollback size. 
+			 * */
+			if(RollbackMode == initParams->fileOpenMode)
+			{
+				sFileLogWriter.rollbackSize = initParams->rollbackSize;
+				fseek(sFileLogWriter.fp,0L,SEEK_END);
+				__CHECK_AND_ROLLBACK(&sFileLogWriter);
+			}
+			else
+				sFileLogWriter.rollbackSize = 0;
 #endif // _ENABLE_LL_ROLLBACK_
+		}
 	}
 
 	/* Set log level */

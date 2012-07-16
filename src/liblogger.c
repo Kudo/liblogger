@@ -33,8 +33,6 @@
 #include <stdarg.h>
 #include <string.h>
 
-#ifndef DISABLE_ALL_LOGS 
-
 /** The log writer func ptr is initialized depending on the log destination. */
 static LogWriter *pLogWriter = 0;
 #ifndef DISABLE_THREAD_SAFETY
@@ -267,5 +265,3 @@ int FuncLogExit(const char* funcName,const int lineNumber)
 	__UNLOCK_MUTEX;
 	return retVal;
 }
-
-#endif /* DISABLE_ALL_LOGS */

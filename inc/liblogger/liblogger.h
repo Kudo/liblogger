@@ -62,140 +62,120 @@ typedef enum LogDest
 #endif	
 
 
-#ifdef DISABLE_ALL_LOGS
-#ifdef __GNUC__
-// Logs needs to be disabled, warn the user.
-#warning Logger disabled.
-#endif // __GNUC__
+/* WIN32 support. */
+#if defined(WIN32) || defined(_WIN32)
+#define __func__ __FUNCTION__
+#endif
 
-	#define LogTrace		/* NOP */
-	#define LogDebug 		/* NOP */
-	#define LogInfo 		/* NOP */
-	#define LogWarn			/* NOP */
-	#define LogError		/* NOP */
-	#define LogFatal		/* NOP */
-	#define LogFuncEntry()	/* NOP */
-	#define LogFuncExit()	/* NOP */
-	#define InitLogger 		/* NOP */
-	#define DeInitLogger()	/* NOP */
+// The logs are enabled.
+
+#ifdef VARIADIC_MACROS	
+int LogStub_vm(LogLevel logLevel,
+	const char* file, const char* funcName, const int lineNum,
+	const char* fmt,...);
+#endif
+/** 
+ * Function used to initialize the logger.
+ * \param [in] ldest The log destination. see \ref LogDest for possible destinations.
+ * \param [in] loggerInitParams The logger initialization parameters.
+ * \returns 0 if successful, -1 if there is a failure.
+ * */
+int InitLogger(LogDest ldest,void* loggerInitParams);
+
+/** Function used to deinitialize the logger. */
+void DeInitLogger();
+
+
+/* -- Log Level Trace -- */
+#ifdef VARIADIC_MACROS
+	#if defined(DISABLE_FILENAMES)
+		/* the filename should be disabled. */
+		#define LogTrace(fmt, ...) LogStub_vm(Trace,"",__func__, __LINE__ , fmt , ## __VA_ARGS__)
+	#else 
+		#define LogTrace(fmt, ...) LogStub_vm(Trace,__FILE__,__func__, __LINE__ , fmt , ## __VA_ARGS__)
+	#endif // DISABLE_FILENAMES
 #else
+	/** Emit a log with Trace level. */
+	int LogTrace(const char *fmt, ...);
+#endif // VARIADIC_MACROS
 
-	/* WIN32 support. */
-	#if defined(WIN32) || defined(_WIN32)
-	#define __func__ __FUNCTION__
-	#endif
+/* -- Log Level Debug -- */
+#ifdef VARIADIC_MACROS
+	#if defined(DISABLE_FILENAMES)
+		/* the filename should be disabled. */
+		#define LogDebug(fmt, ...) LogStub_vm(Debug,"",__func__, __LINE__ , fmt , ## __VA_ARGS__)
+	#else 
+		#define LogDebug(fmt, ...) LogStub_vm(Debug,__FILE__,__func__, __LINE__ , fmt , ## __VA_ARGS__)
+	#endif // DISABLE_FILENAMES
+#else
+	/** Emit a log with Debug level. */
+	int LogDebug(const char *fmt, ...);
+#endif // VARIADIC_MACROS
 
-	// The logs are enabled.
+/* -- Log Level Info -- */
+#ifdef VARIADIC_MACROS
+	#if defined(DISABLE_FILENAMES)
+		/* the filename should be disabled. */
+		#define LogInfo(fmt, ...) LogStub_vm(Info,"",__func__, __LINE__ , fmt , ## __VA_ARGS__)
+	#else 
+		#define LogInfo(fmt, ...) LogStub_vm(Info,__FILE__,__func__, __LINE__ , fmt , ## __VA_ARGS__)
+	#endif // DISABLE_FILENAMES
+#else
+	/** Emit a log with Info level. */
+	int LogInfo(const char *fmt, ...);
+#endif // VARIADIC_MACROS
 
-	#ifdef VARIADIC_MACROS	
-	int LogStub_vm(LogLevel logLevel,
-		const char* file, const char* funcName, const int lineNum,
-		const char* fmt,...);
-	#endif
-	/** 
-	 * Function used to initialize the logger.
-	 * \param [in] ldest The log destination. see \ref LogDest for possible destinations.
-	 * \param [in] loggerInitParams The logger initialization parameters.
-	 * \returns 0 if successful, -1 if there is a failure.
-	 * */
-	int InitLogger(LogDest ldest,void* loggerInitParams);
+/* -- Log Level Warn -- */
+#ifdef VARIADIC_MACROS
+	#if defined(DISABLE_FILENAMES)
+		/* the filename should be disabled. */
+		#define LogWarn(fmt, ...) LogStub_vm(Warn,"",__func__, __LINE__ , fmt , ## __VA_ARGS__)
+	#else 
+		#define LogWarn(fmt, ...) LogStub_vm(Warn,__FILE__,__func__, __LINE__ , fmt , ## __VA_ARGS__)
+	#endif // DISABLE_FILENAMES
+#else
+	/** Emit a log with Warn level. */
+	int LogWarn(const char *fmt, ...);
+#endif // VARIADIC_MACROS
 
-	/** Function used to deinitialize the logger. */
-	void DeInitLogger();
+/* -- Log Level Error-- */
+#ifdef VARIADIC_MACROS
+	#if defined(DISABLE_FILENAMES)
+		/* the filename should be disabled. */
+		#define LogError(fmt, ...) LogStub_vm(Error,"",__func__, __LINE__ , fmt , ## __VA_ARGS__)
+	#else 
+		#define LogError(fmt, ...) LogStub_vm(Error,__FILE__,__func__, __LINE__ , fmt , ## __VA_ARGS__)
+	#endif // DISABLE_FILENAMES
+#else
+	/** Emit a log with Error level. */
+	int LogError(const char *fmt, ...);
+#endif // VARIADIC_MACROS
 
+/* -- Log Level Fatal -- */
+#ifdef VARIADIC_MACROS
+	#if defined(DISABLE_FILENAMES)
+		/* the filename should be disabled. */
+		#define LogFatal(fmt, ...) LogStub_vm(Fatal,"",__func__, __LINE__ , fmt , ## __VA_ARGS__)
+	#else 
+		#define LogFatal(fmt, ...) LogStub_vm(Fatal,__FILE__,__func__, __LINE__ , fmt , ## __VA_ARGS__)
+	#endif // DISABLE_FILENAMES
+#else
+	/** Emit a log with Fatal level. */
+	int LogFatal(const char *fmt, ...);
+#endif // VARIADIC_MACROS
 
-	/* -- Log Level Trace -- */
-	#ifdef VARIADIC_MACROS
-		#if defined(DISABLE_FILENAMES)
-			/* the filename should be disabled. */
-			#define LogTrace(fmt, ...) LogStub_vm(Trace,"",__func__, __LINE__ , fmt , ## __VA_ARGS__)
-		#else 
-			#define LogTrace(fmt, ...) LogStub_vm(Trace,__FILE__,__func__, __LINE__ , fmt , ## __VA_ARGS__)
-		#endif // DISABLE_FILENAMES
-	#else
-		/** Emit a log with Trace level. */
-		int LogTrace(const char *fmt, ...);
-	#endif // VARIADIC_MACROS
-
-	/* -- Log Level Debug -- */
-	#ifdef VARIADIC_MACROS
-		#if defined(DISABLE_FILENAMES)
-			/* the filename should be disabled. */
-			#define LogDebug(fmt, ...) LogStub_vm(Debug,"",__func__, __LINE__ , fmt , ## __VA_ARGS__)
-		#else 
-			#define LogDebug(fmt, ...) LogStub_vm(Debug,__FILE__,__func__, __LINE__ , fmt , ## __VA_ARGS__)
-		#endif // DISABLE_FILENAMES
-	#else
-		/** Emit a log with Debug level. */
-		int LogDebug(const char *fmt, ...);
-	#endif // VARIADIC_MACROS
-
-	/* -- Log Level Info -- */
-	#ifdef VARIADIC_MACROS
-		#if defined(DISABLE_FILENAMES)
-			/* the filename should be disabled. */
-			#define LogInfo(fmt, ...) LogStub_vm(Info,"",__func__, __LINE__ , fmt , ## __VA_ARGS__)
-		#else 
-			#define LogInfo(fmt, ...) LogStub_vm(Info,__FILE__,__func__, __LINE__ , fmt , ## __VA_ARGS__)
-		#endif // DISABLE_FILENAMES
-	#else
-		/** Emit a log with Info level. */
-		int LogInfo(const char *fmt, ...);
-	#endif // VARIADIC_MACROS
-
-	/* -- Log Level Warn -- */
-	#ifdef VARIADIC_MACROS
-		#if defined(DISABLE_FILENAMES)
-			/* the filename should be disabled. */
-			#define LogWarn(fmt, ...) LogStub_vm(Warn,"",__func__, __LINE__ , fmt , ## __VA_ARGS__)
-		#else 
-			#define LogWarn(fmt, ...) LogStub_vm(Warn,__FILE__,__func__, __LINE__ , fmt , ## __VA_ARGS__)
-		#endif // DISABLE_FILENAMES
-	#else
-		/** Emit a log with Warn level. */
-		int LogWarn(const char *fmt, ...);
-	#endif // VARIADIC_MACROS
-
-	/* -- Log Level Error-- */
-	#ifdef VARIADIC_MACROS
-		#if defined(DISABLE_FILENAMES)
-			/* the filename should be disabled. */
-			#define LogError(fmt, ...) LogStub_vm(Error,"",__func__, __LINE__ , fmt , ## __VA_ARGS__)
-		#else 
-			#define LogError(fmt, ...) LogStub_vm(Error,__FILE__,__func__, __LINE__ , fmt , ## __VA_ARGS__)
-		#endif // DISABLE_FILENAMES
-	#else
-		/** Emit a log with Error level. */
-		int LogError(const char *fmt, ...);
-	#endif // VARIADIC_MACROS
-
-	/* -- Log Level Fatal -- */
-	#ifdef VARIADIC_MACROS
-		#if defined(DISABLE_FILENAMES)
-			/* the filename should be disabled. */
-			#define LogFatal(fmt, ...) LogStub_vm(Fatal,"",__func__, __LINE__ , fmt , ## __VA_ARGS__)
-		#else 
-			#define LogFatal(fmt, ...) LogStub_vm(Fatal,__FILE__,__func__, __LINE__ , fmt , ## __VA_ARGS__)
-		#endif // DISABLE_FILENAMES
-	#else
-		/** Emit a log with Fatal level. */
-		int LogFatal(const char *fmt, ...);
-	#endif // VARIADIC_MACROS
-
-	#ifdef VARIADIC_MACROS
-		/* Log Entry to a function. */
-		int FuncLogEntry(const char* funcName);
-		/* Log return from a function. */
-		int FuncLogExit(const char* funcName,const int lineNumber);
-		
-		#define LogFuncEntry()	FuncLogEntry(__func__)
-		#define LogFuncExit()	FuncLogExit(__func__,__LINE__)
-	#else
-		#define LogFuncEntry()	    /*NOP*/
-		#define LogFuncExit()	    /*NOP*/
-	#endif
-
-#endif // DISABLE_ALL_LOGS
+#ifdef VARIADIC_MACROS
+	/* Log Entry to a function. */
+	int FuncLogEntry(const char* funcName);
+	/* Log return from a function. */
+	int FuncLogExit(const char* funcName,const int lineNumber);
+	
+	#define LogFuncEntry()	FuncLogEntry(__func__)
+	#define LogFuncExit()	FuncLogExit(__func__,__LINE__)
+#else
+	#define LogFuncEntry()	    /*NOP*/
+	#define LogFuncExit()	    /*NOP*/
+#endif
 
 
 #ifdef __cplusplus

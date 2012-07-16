@@ -84,7 +84,6 @@ void TestLogFuncs()
 	LogFatal("Fatal level log" );
 
 	
-	TestFuncNoLogs();
 	TestNoFilename();
 
 	// crash testing, test for buffer overflow vulnerability, in case of socket logging, this huge log

@@ -36,8 +36,8 @@
 /** The Fatal log level */
 #define LOG_LEVEL_FATAL	6
 
-/** define this macro to disable logs (in the current file), to disable globally define DISABLE_ALL_LOGS   */
-#define LOG_LEVEL_DISABLED 12
+/** The disable log level */
+#define LOG_LEVEL_DISABLED 0xff
 
 /** Indicates the log level */
 typedef enum LogLevel
