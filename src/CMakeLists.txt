@@ -5,11 +5,19 @@ set(SRC_FILES
 )
 
 if (NOT DISABLE_THREAD_SAFETY)
-    list (APPEND SRC_FILES platform_layer/posix/tPLMutex.c)
+    if (MSVC)
+	list (APPEND SRC_FILES platform_layer/win32/tPLMutex.c)
+    else (MSVC)
+	list (APPEND SRC_FILES platform_layer/posix/tPLMutex.c)
+    endif (MSVC)
 endif ()
 
 if (NOT DISABLE_SOCKET_LOGGER)
-    list (APPEND SRC_FILES socket_logger.c platform_layer/posix/tPLSocket.c)
+    if (MSVC)
+	list (APPEND SRC_FILES socket_logger.c platform_layer/win32/tPLSocket.c)
+    else (MSVC)
+	list (APPEND SRC_FILES socket_logger.c platform_layer/posix/tPLSocket.c)
+    endif (MSVC)
 endif ()
 
 add_library (logger SHARED ${SRC_FILES})

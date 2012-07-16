@@ -24,6 +24,7 @@
 #include <winbase.h>
 #include <stdio.h>
 #include <win32_support.h>
+#pragma comment(lib, "Ws2_32.lib")
 
 
 /* Function to create a \b connected socket.
